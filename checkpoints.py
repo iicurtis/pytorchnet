@@ -2,6 +2,7 @@
 
 import os
 import torch
+from pathlib import Path
 
 
 class Checkpoints:
@@ -20,7 +21,7 @@ class Checkpoints:
     def save(self, epoch, model, best):
         if best is True:
             torch.save(model.state_dict(),
-                       '%s/model_epoch_%d.pth' % (self.dir_save, epoch))
+                       '%s/model_epoch_%06d.pth' % (self.dir_save, epoch))
 
     def load(self, model, filename):
         if os.path.isfile(filename):
@@ -28,4 +29,12 @@ class Checkpoints:
             state_dict = torch.load(filename)
             model.load_state_dict(state_dict)
             return model
+
+        elif os.path.isdir(filename):
+            filename = sorted(list(Path(filename.joinpath("Save")).iterdir()))[-1]
+            print("=> loading checkpoint '{}'".format(filename))
+            state_dict = torch.load(filename)
+            model.load_state_dict(state_dict)
+            return model
+
         raise (Exception("=> no checkpoint found at '{}'".format(filename)))
